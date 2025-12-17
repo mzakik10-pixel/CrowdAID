@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CrowdAID - Smart Hospital Recommendation System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .card h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .icon {
+            font-size: 1.3em;
+        }
+
+        #map {
+            width: 100%;
+            height: 600px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .control-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .input-group label {
+            font-weight: 600;
+            color: #333;
+            font-size: 0.95em;
+        }
+
+        .input-group select,
+        .input-group input {
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: all 0.3s;
+        }
+
+        .input-group select:focus,
+        .input-group input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .btn {
+            padding: 14px 28px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background: #e0e0e0;
+        }
+
+        .recommendations {
+            margin-top: 20px;
+        }
+
+        .hospital-card {
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            margin-bottom: 12px;
+            border-radius: 8px;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .hospital-card:hover {
+            transform: translateX(5px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            background: #fff;
+        }
+
+        .hospital-card.top-recommendation {
+            border-left-color: #10b981;
+            background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+        }
+
+        .hospital-name {
+            font-weight: 700;
+            font-size: 1.1em;
+            color: #1a202c;
+            margin-bottom: 8px;
+        }
+
+        .hospital-info {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 8px;
+            font-size: 0.9em;
+            color: #4a5568;
+        }
+
+        .info-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 4px 10px;
+            background: white;
+            border-radius: 15px;
+            font-size: 0.85em;
+        }
+
+        .score {
+            display: inline-block;
+            padding: 5px 12px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.9em;
+        }
+
+        .score.top {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2em;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 40px;
+            color: #718096;
+        }
+
+        .alert {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-weight: 500;
+        }
+
+        .alert-info {
+            background: #dbeafe;
+            color: #1e40af;
+            border-left: 4px solid #3b82f6;
+        }
+
+        .alert-success {
+            background: #d1fae5;
+            color: #065f46;
+            border-left: 4px solid #10b981;
+        }
+
+        @media (max-width: 1024px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 640px) {
+            .header h1 {
+                font-size: 1.8em;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏥 CrowdAID</h1>
+            <p>Sistem Rekomendasi Rumah Sakit Cerdas Berbasis AI</p>
+            <p style="font-size: 0.9em; margin-top: 5px;">Tangerang Selatan, Banten</p>
+        </div>
+
+        <div class="main-grid">
+            <!-- Control Panel -->
+            <div class="card">
+                <h2><span class="icon">🎯</span> Pencarian & Filter</h2>
+                
+                <div class="control-panel">
+                    <div class="alert alert-info">
+                        📍 Lokasi Anda akan terdeteksi otomatis untuk rekomendasi terbaik
+                    </div>
+
+                    <div class="input-group">
+                        <label>🏥 Jenis Layanan</label>
+                        <select id="serviceType">
+                            <option value="">Semua Jenis</option>
+                            <option value="Rumah Sakit Umum">Rumah Sakit Umum</option>
+                            <option value="Rumah Sakit Khusus Ibu dan Anak">RS Ibu dan Anak</option>
+                            <option value="Rumah Sakit Khusus Bedah">RS Khusus Bedah</option>
+                        </select>
+                    </div>
+
+                    <div class="input-group">
+                        <label>⚕️ Diagnosis / Kondisi Pasien</label>
+                        <select id="diagnosis">
+                            <option value="">Pilih kondisi...</option>
+                            <option value="emergency">🚨 Gawat Darurat</option>
+                            <option value="maternity">🤰 Kehamilan & Persalinan</option>
+                            <option value="surgery">⚕️ Operasi / Bedah</option>
+                            <option value="general">💊 Pemeriksaan Umum</option>
+                            <option value="pediatric">👶 Anak-anak</option>
+                        </select>
+                    </div>
+
+                    <div class="input-group">
+                        <label>🛏️ Kapasitas Minimum</label>
+                        <input type="number" id="minCapacity" placeholder="Minimal tempat tidur" min="0">
+                    </div>
+
+                    <button class="btn btn-primary" onclick="getRecommendations()">
+                        <span>🤖</span> Dapatkan Rekomendasi AI
+                    </button>
+
+                    <button class="btn btn-secondary" onclick="resetFilters()">
+                        🔄 Reset Filter
+                    </button>
+                </div>
+
+                <!-- Statistics -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value" id="totalHospitals">30</div>
+                        <div class="stat-label">Total RS</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="nearestDistance">-</div>
+                        <div class="stat-label">Terdekat (km)</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="avgCapacity">-</div>
+                        <div class="stat-label">Rata² Kapasitas</div>
+                    </div>
+                </div>
+
+                <!-- Recommendations -->
+                <div class="recommendations">
+                    <h2><span class="icon">⭐</span> Rekomendasi</h2>
+                    <div class="loading" id="loading">
+                        <div class="spinner"></div>
+                        <div>Menganalisis dengan AI...</div>
+                    </div>
+                    <div id="recommendationsList"></div>
+                </div>
+            </div>
+
+            <!-- Map -->
+            <div class="card">
+                <h2><span class="icon">🗺️</span> Peta Lokasi</h2>
+                <div id="map"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Hospital data (will be populated from JSON)
+        const hospitalsData = [{"id":3674157,"nama":"RS Columbia Asia BSD","propinsi":"Banten","kab":"Kota Tangerang Selatan","alamat":"Jl. Letnan Soetopo Kav Kom. III A No.7, BSD Tangerang  Selatan, Banten","jenis":"Rumah Sakit Umum","kelas":"B","status_blu":"Non BLU\/BLUD","kepemilikan":"SWASTA\/LAINNYA","total_tempat_tidur":200,"total_layanan":78,"total_tenaga_kerja":263},{"id":3674008,"nama":"RS Ibu dan Anak Bunda Ciputat","propinsi":"Banten","kab":"Kota Tangerang Selatan","alamat":"Jl.RE Martadinata No.30 Kec.Ciputat Kel. Ciputat Kota.Tangerang Selatan","jenis":"Rumah Sakit Khusus Ibu dan Anak","kelas":"C","status_blu":"Non BLU\/BLUD","kepemilikan":"Perusahaan","total_tempat_tidur":25,"total_layanan":18,"total_tenaga_kerja":60},{"id":3674022,"nama":"RS Umum Daerah Serpong Utara","propinsi":"Banten","kab":"Kota Tangerang Selatan","alamat":"Jl. Raya Serpong Kel. Pakulonan Kec. Serpong Utara Kota Tangerang Selatan","jenis":"Rumah Sakit Umum","kelas":"C","status_blu":"BLUD","kepemilikan":"Pemkot","total_tempat_tidur":102,"total_layanan":34,"total_tenaga_kerja":11},{"id":3674005,"nama":"RS Sari Asih Ciputat","propinsi":"Banten","kab":"Kota Tangerang Selatan","alamat":"Jl. Otista Raya Sasak Tinggi No. 3 , RT 004\/ RW 011,  Kelurahan Ciputat, Kecamatan Ciputat, Kota Tangerang Selatan, Banten, 15411","jenis":"Rumah Sakit Umum","kelas":"C","status_blu":"Non BLU\/BLUD","kepemilikan":"Perusahaan","total_tempat_tidur":179,"total_layanan":106,"total_tenaga_kerja":452},{"id":3674021,"nama":"RS Ibu dan Anak Bina Medika","propinsi":"Banten","kab":"Kota Tangerang Selatan","alamat":"Jl. Rasuna Said Kav B7\/A5-08 Sektor 7 CBD Bintaro Jaya","jenis":"Rumah Sakit Khusus Ibu dan Anak","kelas":"C","status_blu":"Non BLU\/BLUD","kepemilikan":"SWASTA\/LAINNYA","total_tempat_tidur":42,"total_layanan":44,"total_tenaga_kerja":44},{"id":3674206,"nama":"RS Khusus Bedah Via Medika","propinsi":"Banten","kab":"Kota Tangerang Selatan","alamat":"Jl. WR Supratman, RT\/RW 005\/006, Kel. Cempaka Putih, Kec. Ciputat Timur","jenis":"Rumah Sakit Khusus Bedah","kelas":"C","status_blu":"Non BLU\/BLUD","kepemilikan":"Perusahaan","total_tempat_tidur":25,"total_layanan":9,"total_tenaga_kerja":0},{"id":3674020,"nama":"RS Mitra Keluarga Bintaro","propinsi":"Banten","kab":"Kota Tangerang Selatan","alamat":"Jl. Raya Bintaro Utama Sektor III A","jenis":"Rumah Sakit Umum","kelas":"C","status_blu":"Non BLU\/BLUD","kepemilikan":"Perusahaan","total_tempat_tidur":100,"total_layanan":90,"total_tenaga_kerja":129},{"id":3674205,"nama":"RS. Mitra Keluarga Pamulang","propinsi":"Banten","kab":"Kota Tangerang Selatan","alamat":"Jl. Moch Toha RT\/RW 002\/017","jenis":"Rumah Sakit Umum","kelas":"C","status_blu":"Non BLU\/BLUD","kepemilikan":"SWASTA\/LAINNYA","total_tempat_tidur":99,"total_layanan":36,"total_tenaga_kerja":0},{"id":3603082,"nama":"RS Ichsan Medical Center","propinsi":"Banten","kab":"Kota Tangerang Selatan","alamat":"Jl. Raya Jombang No. 56 , Kelurahan Jombang,  Kecamatan Ciputat, Kota Tangerang Selatan, Banten","jenis":"Rumah Sakit Umum","kelas":"C","status_blu":"Non BLU\/BLUD","kepemilikan":"SWASTA\/LAINNYA","total_tempat_tidur":107,"total_layanan":47,"total_tenaga_kerja":146},{"id":3671216,"nama":"RS Rumah Indonesia Sehat","propinsi":"Banten","kab":"Kota Tangerang Selatan","alamat":"Jl. Lengkong Gudang Timur Raya No. 777 BSD - Tangerang Selatan ","jenis":"Rumah Sakit Umum","kelas":"C","status_blu":"Non BLU\/BLUD","kepemilikan":"SWASTA\/LAINNYA","total_tempat_tidur":100,"total_layanan":32,"total_tenaga_kerja":243},{"id":3674003,"nama":"RS Ibu dan Anak Permata Sarana Husada","propinsi":"Banten","kab":"Kota Tangerang Selatan","alamat":"Jl. Pamulang Permai Blok D3 No. 1-3","jenis":"Rumah Sakit Khusus Ibu dan Anak","kelas":"C","status_blu":"Non BLU\/BLUD","kepemilikan":"SWASTA\/LAINNYA","total_tempat_tidur":36,"total_layanan":17,"total_tenaga_kerja":55},{"id":3674013,"nama":"RS Ibu dan Anak Buah Hati Pamulang","propinsi":"Banten","kab":"Kota Tangerang Selatan","alamat":"Jl Raya Siliwangi No 189 Kelurahan Benda Baru, Kecamatan Pamulang","jenis":"Rumah Sakit Khusus Ibu dan Anak","kelas":"C","status_blu":"Non BLU\/BLUD","kepemilikan":"Perusahaan","total_tempat_tidur":50,"total_layanan":31,"total_tenaga_kerja":101},{"id":3674113,"nama":"RS Eka","propinsi":"Banten","kab":"Kota Tangerang Selatan","alamat":"Central Business Distric Lot IX, BSD City.","jenis":"Rumah Sakit Umum","kelas":"B","status_blu":"Non BLU\/BLUD","kepemilikan":"SWASTA\/LAINNYA","total_tempat_tidur":203,"total_layanan":102,"total_tenaga_kerja":875},{"id":3674014,"nama":"RS Hermina Serpong","propinsi":"Banten","kab":"Kota Tangerang Selatan","alamat":"Jl. Raya Puspitek No.km 1 No 99, Buaran, Kec. Serpong, Kota Tangerang Selatan, Banten 15310","jenis":"Rumah Sakit Umum","kelas":"C","status_blu":"Non BLU\/BLUD","kepemilikan":"SWASTA\/LAINNYA","total_tempat_tidur":125,"total_layanan":81,"total_tenaga_kerja":227},{"id":3674204,"nama":"RS Umum Daerah Pondok Aren","propinsi":"Banten","kab":"Kota Tangerang Selatan","alamat":"Jalan Raya Pondok Betung, Kelurahan Pondok Betung, Kecamatan Pondok Aren, Kota Tangerang Selatan, Provinsi Banten","jenis":"Rumah Sakit Umum","kelas":"C","status_blu":"Non BLU\/BLUD","kepemilikan":"Pemkot","total_tempat_tidur":93,"total_layanan":21,"total_tenaga_kerja":0},{"id":3674016,"nama":"RS Insan Permata","propinsi":"Banten","kab":"Kota Tangerang Selatan","alamat":"Jl. Bhayangkara 1 No.68 Kel. Pakujaya Kec. Serpong Utara Tangerang Selatan","jenis":"Rumah Sakit Umum","kelas":"C","status_blu":"Non BLU\/BLUD","kepemilikan":"SWASTA\/LAINNYA","total_tempat_tidur":104,"total_layanan":27,"total_tenaga_kerja":132},{"id":3674193,"nama":"RS Buah Hati Ciputat","propinsi":"Banten","kab":"Kota Tangerang Selatan","alamat":"Jl Aria Putra No 399 Serua Indah","jenis":"Rumah Sakit Umum","kelas":"C","status_blu":"Non BLU\/BLUD","kepemilikan":"Perusahaan","total_tempat_tidur":100,"total_layanan":48,"total_tenaga_kerja":141},{"id":3674004,"nama":"RS Permata Pamulang","propinsi":"Banten","kab":"Kota Tangerang Selatan","alamat":"Jl Raya Siliwangi No 1A Pondok Benda","jenis":"Rumah Sakit Umum","kelas":"C","status_blu":"Non BLU\/BLUD","kepemilikan":"SWASTA\/LAINNYA","total_tempat_tidur":100,"total_layanan":84,"total_tenaga_kerja":309},{"id":3674168,"nama":"RS Umum Daerah Kota Tangerang Selatan","propinsi":"Banten","kab":"Kota Tangerang Selatan","alamat":" Jl. Pajajaran No.101, Kec.Pamulang, Kota Tangerang Selatan ","jenis":"Rumah Sakit Umum","kelas":"C","status_blu":"BLUD","kepemilikan":"Pemkot","total_tempat_tidur":178,"total_layanan":38,"total_tenaga_kerja":300},{"id":3674024,"nama":"RS Grandmed Cibubur","propinsi":"Banten","kab":"Kota Tangerang Selatan","alamat":"Jl. Aria Putra Kel. Serua Kec. Ciputat","jenis":"Rumah Sakit Umum","kelas":"C","status_blu":"Non BLU\/BLUD","kepemilikan":"SWASTA\/LAINNYA","total_tempat_tidur":53,"total_layanan":24,"total_tenaga_kerja":134},{"id":3674182,"nama":"RS Umum Medika BSD","propinsi":"Banten","kab":"Kota Tangerang Selatan","alamat":"Jl. Pahlawan Seribu Kavling Komersia BSD City Tangerang Selatan","jenis":"Rumah Sakit Umum","kelas":"C","status_blu":"Non BLU\/BLUD","kepemilikan":"SWASTA\/LAINNYA","total_tempat_tidur":100,"total_layanan":48,"total_tenaga_kerja":202},{"id":3674183,"nama":"RS St. Carolus Serpong","propinsi":"Banten","kab":"Kota Tangerang Selatan","alamat":"Jl. Sriwijaya Kel. Ciater Kec. Serpong Kota Tangerang Selatan","jenis":"Rumah Sakit Umum","kelas":"C","status_blu":"Non BLU\/BLUD","kepemilikan":"Yayasan","total_tempat_tidur":103,"total_layanan":33,"total_tenaga_kerja":148},{"id":3674184,"nama":"RS Annisa Ciputat","propinsi":"Banten","kab":"Kota Tangerang Selatan","alamat":"Jl. Dewi Sartika No.289 Kel. Sawah Baru Kec. Ciputat","jenis":"Rumah Sakit Umum","kelas":"C","status_blu":"Non BLU\/BLUD","kepemilikan":"Yayasan","total_tempat_tidur":138,"total_layanan":24,"total_tenaga_kerja":162},{"id":3674017,"nama":"RS Columbia Asia Serpong","propinsi":"Banten","kab":"Kota Tangerang Selatan","alamat":"Jalan Gading Serpong Boulevard Blok AA3\/2 - 01","jenis":"Rumah Sakit Umum","kelas":"B","status_blu":"Non BLU\/BLUD","kepemilikan":"SWASTA\/LAINNYA","total_tempat_tidur":125,"total_layanan":91,"total_tenaga_kerja":342},{"id":3674018,"nama":"RS Bhakti Yudha","propinsi":"Banten","kab":"Kota Tangerang Selatan","alamat":"Jl. Masjid Al Hidayah Kp. Sawah Baru Ciputat","jenis":"Rumah Sakit Umum","kelas":"D","status_blu":"Non BLU\/BLUD","kepemilikan":"SWASTA\/LAINNYA","total_tempat_tidur":24,"total_layanan":14,"total_tenaga_kerja":72},{"id":3674185,"nama":"RS Harapan Bunda","propinsi":"Banten","kab":"Kota Tangerang Selatan","alamat":"Jl. Kemang Raya Bojong Nangka Kelapa Dua Kabupaten Tangerang-Banten","jenis":"Rumah Sakit Umum","kelas":"C","status_blu":"Non BLU\/BLUD","kepemilikan":"Perusahaan","total_tempat_tidur":88,"total_layanan":33,"total_tenaga_kerja":160},{"id":3674186,"nama":"RS Usada Insani","propinsi":"Banten","kab":"Kota Tangerang Selatan","alamat":"Jl. Raya Serpong - Siliwangi Pamulang Barat Tangerang Selatan","jenis":"Rumah Sakit Umum","kelas":"C","status_blu":"Non BLU\/BLUD","kepemilikan":"SWASTA\/LAINNYA","total_tempat_tidur":62,"total_layanan":42,"total_tenaga_kerja":167},{"id":3674187,"nama":"RS Premier Bintaro","propinsi":"Banten","kab":"Kota Tangerang Selatan","alamat":"Jl. M.H. Thamrin Kav. 1 Bintaro Sektor VII","jenis":"Rumah Sakit Umum","kelas":"B","status_blu":"Non BLU\/BLUD","kepemilikan":"SWASTA\/LAINNYA","total_tempat_tidur":175,"total_layanan":71,"total_tenaga_kerja":430},{"id":3674188,"nama":"RS Hermina Ciputat","propinsi":"Banten","kab":"Kota Tangerang Selatan","alamat":"Jl. Ir. H. Juanda No 95 Ciputat","jenis":"Rumah Sakit Umum","kelas":"C","status_blu":"Non BLU\/BLUD","kepemilikan":"SWASTA\/LAINNYA","total_tempat_tidur":89,"total_layanan":62,"total_tenaga_kerja":234},{"id":3674194,"nama":"RS Amanda","propinsi":"Banten","kab":"Kota Tangerang Selatan","alamat":"Jl Dewi Sartika 28-30 Kel. Sawah Lama Kec. Ciputat Kota Tangerang Selatan","jenis":"Rumah Sakit Umum","kelas":"D","status_blu":"Non BLU\/BLUD","kepemilikan":"Yayasan","total_tempat_tidur":70,"total_layanan":16,"total_tenaga_kerja":112}];
+
+        let map;
+        let markers = [];
+        let userMarker = null;
+        let userLocation = { lat: -6.2875, lng: 106.7125 }; // Default: Tangerang Selatan center
+
+        // Initialize Google Maps
+        function initMap() {
+            // Create map centered on Tangerang Selatan
+            map = new google.maps.Map(document.getElementById('map'), {
+                zoom: 12,
+                center: userLocation,
+                mapTypeControl: true,
+                streetViewControl: false,
+                fullscreenControl: true,
+                styles: [
+                    {
+                        featureType: "poi.medical",
+                        elementType: "labels",
+                        stylers: [{ visibility: "on" }]
+                    }
+                ]
+            });
+
+            // Try to get user's location
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        userLocation = {
+                            lat: position.coords.latitude,
+                            lng: position.coords.longitude
+                        };
+                        map.setCenter(userLocation);
+                        
+                        // Add user location marker
+                        userMarker = new google.maps.Marker({
+                            position: userLocation,
+                            map: map,
+                            icon: {
+                                path: google.maps.SymbolPath.CIRCLE,
+                                scale: 10,
+                                fillColor: '#4285F4',
+                                fillOpacity: 1,
+                                strokeColor: 'white',
+                                strokeWeight: 3
+                            },
+                            title: 'Lokasi Anda'
+                        });
+
+                        new google.maps.InfoWindow({
+                            content: '<div style="padding: 10px;"><strong>📍 Lokasi Anda</strong></div>'
+                        }).open(map, userMarker);
+                    },
+                    () => {
+                        console.log('Using default location');
+                    }
+                );
+            }
+
+            // Add hospital markers
+            addHospitalMarkers(hospitalsData);
+            
+            // Update statistics
+            updateStatistics(hospitalsData);
+        }
+
+        // Calculate distance between two points (Haversine formula)
+        function calculateDistance(lat1, lon1, lat2, lon2) {
+            const R = 6371; // Earth's radius in km
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLon = (lon2 - lon1) * Math.PI / 180;
+            const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                     Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                     Math.sin(dLon/2) * Math.sin(dLon/2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            return R * c;
+        }
+
+        // Geocode hospital addresses and add markers
+        async function addHospitalMarkers(hospitals) {
+            const geocoder = new google.maps.Geocoder();
+            const bounds = new google.maps.LatLngBounds();
+
+            for (const hospital of hospitals) {
+                try {
+                    const result = await geocodeAddress(geocoder, hospital.alamat + ', Tangerang Selatan, Banten');
+                    if (result) {
+                        hospital.coordinates = result;
+                        bounds.extend(result);
+
+                        const marker = new google.maps.Marker({
+                            position: result,
+                            map: map,
+                            title: hospital.nama,
+                            icon: {
+                                url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
+                                    <svg width="40" height="40" xmlns="http://www.w3.org/2000/svg">
+                                        <circle cx="20" cy="20" r="18" fill="#ef4444" stroke="white" stroke-width="3"/>
+                                        <text x="20" y="28" font-size="20" text-anchor="middle" fill="white">🏥</text>
+                                    </svg>
+                                `),
+                                scaledSize: new google.maps.Size(40, 40)
+                            }
+                        });
+
+                        const infoWindow = new google.maps.InfoWindow({
+                            content: createInfoWindowContent(hospital)
+                        });
+
+                        marker.addListener('click', () => {
+                            infoWindow.open(map, marker);
+                        });
+
+                        markers.push({ marker, hospital });
+                    }
+                } catch (error) {
+                    console.error(`Error geocoding ${hospital.nama}:`, error);
+                }
+            }
+
+            map.fitBounds(bounds);
+        }
+
+        // Geocode address helper
+        function geocodeAddress(geocoder, address) {
+            return new Promise((resolve, reject) => {
+                geocoder.geocode({ address: address }, (results, status) => {
+                    if (status === 'OK' && results[0]) {
+                        resolve(results[0].geometry.location);
+                    } else {
+                        resolve(null);
+                    }
+                });
+            });
+        }
+
+        // Create info window content
+        function createInfoWindowContent(hospital) {
+            return `
+                <div style="max-width: 300px; padding: 10px;">
+                    <h3 style="margin: 0 0 10px 0; color: #667eea; font-size: 1.1em;">${hospital.nama}</h3>
+                    <p style="margin: 5px 0; color: #666;"><strong>🏥 Jenis:</strong> ${hospital.jenis}</p>
+                    <p style="margin: 5px 0; color: #666;"><strong>📍 Alamat:</strong> ${hospital.alamat}</p>
+                    <p style="margin: 5px 0; color: #666;"><strong>🛏️ Kapasitas:</strong> ${hospital.total_tempat_tidur} tempat tidur</p>
+                    <p style="margin: 5px 0; color: #666;"><strong>⚕️ Layanan:</strong> ${hospital.total_layanan} jenis layanan</p>
+                    <p style="margin: 5px 0; color: #666;"><strong>👥 Tenaga Kerja:</strong> ${hospital.total_tenaga_kerja} orang</p>
+                    <p style="margin: 5px 0; color: #666;"><strong>🏛️ Kelas:</strong> ${hospital.kelas}</p>
+                </div>
+            `;
+        }
+
+        // AI Recommendation System
+        function getRecommendations() {
+            const serviceType = document.getElementById('serviceType').value;
+            const diagnosis = document.getElementById('diagnosis').value;
+            const minCapacity = parseInt(document.getElementById('minCapacity').value) || 0;
+
+            // Show loading
+            document.getElementById('loading').classList.add('active');
+            document.getElementById('recommendationsList').innerHTML = '';
+
+            setTimeout(() => {
+                let filteredHospitals = hospitalsData.filter(h => {
+                    let match = true;
+                    if (serviceType && h.jenis !== serviceType) match = false;
+                    if (minCapacity && h.total_tempat_tidur < minCapacity) match = false;
+                    return match;
+                });
+
+                // Calculate AI scores for each hospital
+                filteredHospitals = filteredHospitals.map(hospital => {
+                    let score = 0;
+                    let reasons = [];
+
+                    // Calculate distance if coordinates available
+                    let distance = null;
+                    if (hospital.coordinates) {
+                        distance = calculateDistance(
+                            userLocation.lat,
+                            userLocation.lng,
+                            hospital.coordinates.lat(),
+                            hospital.coordinates.lng()
+                        );
+                        
+                        // Distance score (closer = higher score, max 40 points)
+                        const distanceScore = Math.max(0, 40 - (distance * 2));
+                        score += distanceScore;
+                        reasons.push(`Jarak: ${distance.toFixed(1)} km`);
+                    }
+
+                    // Capacity score (max 25 points)
+                    const capacityScore = Math.min(25, (hospital.total_tempat_tidur / 10));
+                    score += capacityScore;
+
+                    // Services score (max 20 points)
+                    const servicesScore = Math.min(20, (hospital.total_layanan / 5));
+                    score += servicesScore;
+
+                    // Staff score (max 15 points)
+                    const staffScore = Math.min(15, (hospital.total_tenaga_kerja / 30));
+                    score += staffScore;
+
+                    // Diagnosis-based bonus
+                    if (diagnosis === 'emergency') {
+                        if (hospital.jenis === 'Rumah Sakit Umum' && hospital.kelas === 'B') {
+                            score += 10;
+                            reasons.push('✅ Cocok untuk gawat darurat');
+                        }
+                    } else if (diagnosis === 'maternity' || diagnosis === 'pediatric') {
+                        if (hospital.jenis.includes('Ibu dan Anak')) {
+                            score += 15;
+                            reasons.push('✅ Spesialis ibu dan anak');
+                        }
+                    } else if (diagnosis === 'surgery') {
+                        if (hospital.jenis.includes('Bedah') || hospital.total_layanan > 50) {
+                            score += 10;
+                            reasons.push('✅ Fasilitas bedah lengkap');
+                        }
+                    }
+
+                    // Class bonus
+                    if (hospital.kelas === 'B') {
+                        score += 5;
+                    }
+
+                    return {
+                        ...hospital,
+                        aiScore: Math.round(score),
+                        distance: distance,
+                        reasons: reasons
+                    };
+                });
+
+                // Sort by AI score
+                filteredHospitals.sort((a, b) => b.aiScore - a.aiScore);
+
+                // Display recommendations
+                displayRecommendations(filteredHospitals);
+                
+                // Update map markers
+                updateMapMarkers(filteredHospitals);
+
+                // Hide loading
+                document.getElementById('loading').classList.remove('active');
+            }, 1000);
+        }
+
+        // Display recommendations
+        function displayRecommendations(hospitals) {
+            const container = document.getElementById('recommendationsList');
+            
+            if (hospitals.length === 0) {
+                container.innerHTML = '<div class="no-results">❌ Tidak ada rumah sakit yang sesuai dengan kriteria</div>';
+                return;
+            }
+
+            container.innerHTML = hospitals.slice(0, 10).map((hospital, index) => {
+                const isTop = index === 0;
+                return `
+                    <div class="hospital-card ${isTop ? 'top-recommendation' : ''}" onclick="focusHospital(${hospital.id})">
+                        ${isTop ? '<div style="margin-bottom: 8px; color: #10b981; font-weight: 700;">⭐ REKOMENDASI TERBAIK</div>' : ''}
+                        <div class="hospital-name">${index + 1}. ${hospital.nama}</div>
+                        <div class="hospital-info">
+                            ${hospital.distance ? `<span class="info-badge">📍 ${hospital.distance.toFixed(1)} km</span>` : ''}
+                            <span class="info-badge">🛏️ ${hospital.total_tempat_tidur} bed</span>
+                            <span class="info-badge">⚕️ ${hospital.total_layanan} layanan</span>
+                            <span class="info-badge">👥 ${hospital.total_tenaga_kerja} staff</span>
+                        </div>
+                        <div style="margin-top: 8px; font-size: 0.85em; color: #4a5568;">
+                            ${hospital.reasons.join(' • ')}
+                        </div>
+                        <div style="margin-top: 10px;">
+                            <span class="score ${isTop ? 'top' : ''}">🤖 AI Score: ${hospital.aiScore}/100</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Update map markers based on filtered results
+        function updateMapMarkers(filteredHospitals) {
+            const filteredIds = new Set(filteredHospitals.map(h => h.id));
+            
+            markers.forEach(({ marker, hospital }) => {
+                if (filteredIds.has(hospital.id)) {
+                    marker.setVisible(true);
+                    // Highlight top recommendation
+                    if (filteredHospitals[0].id === hospital.id) {
+                        marker.setIcon({
+                            url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
+                                <svg width="50" height="50" xmlns="http://www.w3.org/2000/svg">
+                                    <circle cx="25" cy="25" r="23" fill="#10b981" stroke="white" stroke-width="4"/>
+                                    <text x="25" y="33" font-size="24" text-anchor="middle" fill="white">⭐</text>
+                                </svg>
+                            `),
+                            scaledSize: new google.maps.Size(50, 50)
+                        });
+                    }
+                } else {
+                    marker.setVisible(false);
+                }
+            });
+        }
+
+        // Focus on hospital on map
+        function focusHospital(hospitalId) {
+            const markerData = markers.find(m => m.hospital.id === hospitalId);
+            if (markerData && markerData.hospital.coordinates) {
+                map.setCenter(markerData.hospital.coordinates);
+                map.setZoom(15);
+                google.maps.event.trigger(markerData.marker, 'click');
+            }
+        }
+
+        // Update statistics
+        function updateStatistics(hospitals) {
+            const totalHospitals = hospitals.length;
+            
+            // Calculate distances and find nearest
+            let minDistance = Infinity;
+            hospitals.forEach(h => {
+                if (h.coordinates) {
+                    const dist = calculateDistance(
+                        userLocation.lat,
+                        userLocation.lng,
+                        h.coordinates.lat(),
+                        h.coordinates.lng()
+                    );
+                    if (dist < minDistance) minDistance = dist;
+                }
+            });
+
+            // Calculate average capacity
+            const avgCapacity = Math.round(
+                hospitals.reduce((sum, h) => sum + h.total_tempat_tidur, 0) / totalHospitals
+            );
+
+            document.getElementById('totalHospitals').textContent = totalHospitals;
+            document.getElementById('nearestDistance').textContent = 
+                minDistance !== Infinity ? minDistance.toFixed(1) : '-';
+            document.getElementById('avgCapacity').textContent = avgCapacity;
+        }
+
+        // Reset filters
+        function resetFilters() {
+            document.getElementById('serviceType').value = '';
+            document.getElementById('diagnosis').value = '';
+            document.getElementById('minCapacity').value = '';
+            document.getElementById('recommendationsList').innerHTML = '';
+            
+            // Reset all markers
+            markers.forEach(({ marker }) => {
+                marker.setVisible(true);
+                marker.setIcon({
+                    url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
+                        <svg width="40" height="40" xmlns="http://www.w3.org/2000/svg">
+                            <circle cx="20" cy="20" r="18" fill="#ef4444" stroke="white" stroke-width="3"/>
+                            <text x="20" y="28" font-size="20" text-anchor="middle" fill="white">🏥</text>
+                        </svg>
+                    `),
+                    scaledSize: new google.maps.Size(40, 40)
+                });
+            });
+
+            // Reset map bounds
+            const bounds = new google.maps.LatLngBounds();
+            markers.forEach(({ marker }) => {
+                bounds.extend(marker.getPosition());
+            });
+            map.fitBounds(bounds);
+        }
+    </script>
+
+    <!-- Load Google Maps API -->
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA-7mZne-UWljIec1AKMmVI_CmHu2vk3kc&callback=initMap" async defer></script>
+</body>
+</html>
